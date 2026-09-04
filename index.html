@@ -536,18 +536,19 @@ function edgeApp(c){ c.innerHTML = `
   </div>
 </div>`;
 const urlInput = c.querySelector('#url'); const goBtn = c.querySelector('#go-btn'); const pageArea = c.querySelector('#page');
-function handleSearch(){ const query = urlInput.value.trim(); if(!query) return;
-window.open("https://bing.com" + encodeURIComponent(query), "_blank");
+function handleSearch(){ const rawInput = urlInput.value.trim(); if(!rawInput) return;
+let cleanTarget = rawInput; if(!(/^https?:\/\//i.test(rawInput))){ if(/^[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/i.test(rawInput)){ cleanTarget = "https://" + rawInput; } else { cleanTarget = "https://www.bing.com/search?q=" + encodeURIComponent(rawInput); } }
+window.open(cleanTarget, "_blank");
 pageArea.innerHTML = `
 <div style="text-align: center; max-width: 540px; width: 100%; animation: fadeIn 0.3s ease-in-out;">
-  <div style="font-size: 28px; font-weight: 600; margin-bottom: 16px; color: #58a6ff;">🔎 Searching: "${query.replace(/</g, "&lt;").replace(/>/g, "&gt;")}"</div>
+  <div style="font-size: 24px; font-weight: 600; margin-bottom: 16px; color: #58a6ff; word-break: break-all;">🔎 Route Active: "${rawInput.replace(/</g, "&lt;").replace(/>/g, "&gt;")}"</div>
   <div style="background: #21262d; border: 1px solid #30363d; border-radius: 8px; padding: 24px; box-sizing: border-box; box-shadow: 0 4px 12px rgba(0,0,0,0.3); text-align: left;">
     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
       <div style="width: 10px; height: 10px; background: #238636; border-radius: 50%;"></div>
       <strong style="font-size: 14px; color: #f0f6fc;">Secure Breakout Executed Successfully</strong>
     </div>
-    <p style="color: #8b949e; font-size: 13px; line-height: 1.5; margin: 0 0 16px 0;">To protect your simulation from cross-origin policy failures (X-Frame-Options) and network blockades, your raw search engine results have been safely routed to an independent, un-sandboxed browsing tab.</p>
-    <div style="font-size: 11px; color: #8b949e; background: #161b22; padding: 8px 12px; border-radius: 4px; border: 1px solid #30363d; font-family: monospace; word-break: break-all;">Status: Isolated External Tab Active</div>
+    <p style="color: #8b949e; font-size: 13px; line-height: 1.5; margin: 0 0 16px 0;">To protect your web desktop sandbox layout from cross-origin errors (X-Frame-Options), the raw unblocked target window has been launched into a pristine parallel tab.</p>
+    <div style="font-size: 11px; color: #8b949e; background: #161b22; padding: 8px 12px; border-radius: 4px; border: 1px solid #30363d; font-family: monospace; word-break: break-all;">Target: ${cleanTarget.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
   </div>
 </div>`; }
 goBtn.addEventListener('click', handleSearch);
