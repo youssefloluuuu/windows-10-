@@ -510,18 +510,328 @@ function personalApp(c){
 }
 function dialog2(title,msg){let ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;z-index:100030;background:#0008;display:grid;place-items:center';let box=document.createElement('div');box.style.cssText='background:#fff;color:#111;min-width:300px;max-width:520px;padding:22px;box-shadow:0 15px 45px #0008';box.innerHTML='<h3>'+esc(title)+'</h3><pre style="white-space:pre-wrap">'+esc(msg)+'</pre>';box.appendChild(btn('OK',()=>ov.remove(),true));ov.appendChild(box);document.body.appendChild(ov)}
 function storeApp(c){let r=shell('Microsoft Store','<input class="v-input" id="filter" placeholder="Search apps"><div id="apps"></div>',true);let list=r.querySelector('#apps'),filter=r.querySelector('#filter');function draw(){let s=filter.value.toLowerCase();list.innerHTML='';Object.keys(V).filter(k=>V[k][0].toLowerCase().includes(s)).forEach(k=>{let row=document.createElement('div');row.className='v-shop';row.innerHTML='<span style="font-size:38px">'+V[k][1]+'</span><span style="flex:1"><b>'+V[k][0]+'</b><br><small>Windows Web application</small></span>';let installed=state.installed.includes(V[k][0]);let b=btn(installed?'Uninstall':'Install',()=>{if(installed){state.installed=state.installed.filter(x=>x!==V[k][0]);notify('Microsoft Store',V[k][0]+' uninstalled')}else{state.installed.push(V[k][0]);toast2('Installing '+V[k][0]+'…');setTimeout(()=>notify('Microsoft Store',V[k][0]+' installed'),700)}persist();draw()});row.appendChild(b);row.appendChild(btn('Launch',()=>open(k)));list.appendChild(row)})}filter.oninput=draw;draw();c.appendChild(r)}
-function openRealBrowserTab(url){url=String(url||'').trim();if(!url)return;let a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),1000)}
-function realBingSearch(q){q=String(q||'').trim();if(!q)return;let u='https://www.bing.com/search?q='+encodeURIComponent(q);openRealBrowserTab(u)}
-function realGoogleSearch(q){q=String(q||'').trim();if(!q)return;let u='https://www.google.com/search?q='+encodeURIComponent(q);openRealBrowserTab(u)}
-function browserSearch(){let b=document.getElementById('browserSearch');if(!b)return;let q=b.value.trim();if(!q){b.focus();return}realBingSearch(q)}
-function browserGo(){let a=document.getElementById('browserAddress');if(!a)return;let t=a.value.trim();if(!t)return;if(t.startsWith('http://')||t.startsWith('https://')){openRealBrowserTab(t)}else{realBingSearch(t)}}
-function browserSearchPreset(site){let b=document.getElementById('browserSearch');if(b)b.value=site;if(site==='Bing'){openRealBrowserTab('https://www.bing.com/');return}if(site==='Google'){openRealBrowserTab('https://www.google.com/');return}if(site==='YouTube'){openRealBrowserTab('https://www.youtube.com/');return}if(site==='Wikipedia'){openRealBrowserTab('https://www.wikipedia.org/');return}realBingSearch(site)}
-function browserReload(){let a=document.getElementById('browserAddress');if(!a)return;let u=a.value.trim();if(!u){browserHome();return}if(!u.startsWith('http://')&&!u.startsWith('https://'))u='https://www.bing.com/search?q='+encodeURIComponent(u);openRealBrowserTab(u)}
-function browserBack(){try{history.back()}catch(e){}}
-function browserForward(){try{history.forward()}catch(e){}}
-function browserHome(){let p=document.getElementById('browserPage');let a=document.getElementById('browserAddress');if(a)a.value='https://www.bing.com/';if(p)p.innerHTML='<div class="browser-home"><div class="browser-logo"><span class="browser-logo-icon">🌐</span><span>Microsoft Edge</span></div><div class="browser-subtitle">Your fake Edge browser — with real web searching</div><div class="browser-search-box"><span class="browser-search-icon">🔎</span><input id="browserSearch" type="text" placeholder="Search the web with Bing..." autocomplete="off" spellcheck="false"><button onclick="browserSearch()">🔍</button></div><div class="browser-shortcuts"><button onclick="browserSearchPreset(\'Bing\')"><span>🔎</span><small>Bing</small></button><button onclick="browserSearchPreset(\'Google\')"><span>🌐</span><small>Google</small></button><button onclick="browserSearchPreset(\'YouTube\')"><span>▶️</span><small>YouTube</small></button><button onclick="browserSearchPreset(\'Wikipedia\')"><span>📚</span><small>Wikipedia</small></button></div><div class="browser-info-card"><div class="browser-info-icon">🌎</div><div><b>Real web search</b><p>Searches open in a real browser tab while this fake Edge window stays open.</p></div></div><div class="browser-status"><span class="status-dot"></span>Real web search ready</div></div>';let s=document.getElementById('browserSearch');if(s){s.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();browserSearch()}});setTimeout(()=>{try{s.focus()}catch(e){}},50)}}
-function edgeApp(c){edge(c)}
-function browser(c){edge(c)}
+function edge513(c) {
+    c.innerHTML = `
+        <div class="edge513">
+            <div class="edge513-toolbar">
+                <button class="edge513-nav" onclick="edge513Back()">←</button>
+                <button class="edge513-nav" onclick="edge513Forward()">→</button>
+                <button class="edge513-nav" onclick="edge513Home()">⌂</button>
+
+                <input
+                    id="edge513Url"
+                    class="edge513-address"
+                    type="text"
+                    value="https://www.bing.com"
+                    placeholder="Search or enter web address"
+                    onkeydown="if (event.key === 'Enter') edge513Go()"
+                >
+
+                <button class="edge513-go" onclick="edge513Go()">Go</button>
+            </div>
+
+            <div id="edge513Page" class="edge513-page"></div>
+        </div>
+    `;
+
+    edge513Home();
+}
+
+
+function edge513Home() {
+    var page = document.getElementById("edge513Page");
+    var address = document.getElementById("edge513Url");
+
+    if (!page) {
+        return;
+    }
+
+    if (address) {
+        address.value = "https://www.bing.com";
+    }
+
+    page.innerHTML = `
+        <div class="edge513-home">
+            <div class="edge513-logo">
+                <span>Microsoft</span> Edge
+            </div>
+
+            <div class="edge513-search-box">
+                <input
+                    id="edge513Search"
+                    type="text"
+                    placeholder="Search the web"
+                    onkeydown="if (event.key === 'Enter') edge513Search()"
+                >
+                <button onclick="edge513Search()">Search</button>
+            </div>
+
+            <div class="edge513-shortcuts">
+                <button onclick="edge513Site('https://www.bing.com')">
+                    Bing
+                </button>
+
+                <button onclick="edge513Site('https://www.google.com')">
+                    Google
+                </button>
+
+                <button onclick="edge513Site('https://www.youtube.com')">
+                    YouTube
+                </button>
+
+                <button onclick="edge513Site('https://www.wikipedia.org')">
+                    Wikipedia
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+
+function edge513Search() {
+    var input = document.getElementById("edge513Search");
+
+    if (!input) {
+        return;
+    }
+
+    var query = input.value.trim();
+
+    if (query === "") {
+        return;
+    }
+
+    edge513Open(
+        "https://www.bing.com/search?q=" +
+        encodeURIComponent(query)
+    );
+}
+
+
+function edge513Go() {
+    var input = document.getElementById("edge513Url");
+
+    if (!input) {
+        return;
+    }
+
+    var value = input.value.trim();
+
+    if (value === "") {
+        return;
+    }
+
+    if (
+        value.indexOf("http://") !== 0 &&
+        value.indexOf("https://") !== 0
+    ) {
+        if (
+            value.indexOf(".") !== -1 &&
+            value.indexOf(" ") === -1
+        ) {
+            value = "https://" + value;
+        } else {
+            value =
+                "https://www.bing.com/search?q=" +
+                encodeURIComponent(value);
+        }
+    }
+
+    edge513Open(value);
+}
+
+
+function edge513Site(url) {
+    edge513Open(url);
+}
+
+
+function edge513Open(url) {
+    var link = document.createElement("a");
+
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+
+function edge513Back() {
+    try {
+        window.history.back();
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+function edge513Forward() {
+    try {
+        window.history.forward();
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+
+function browser(c) {
+    edge513(c);
+}
+
+
+function edge(c) {
+    edge513(c);
+}
+
+
+/* Edge styling */
+
+(function () {
+    var style = document.createElement("style");
+
+    style.textContent = `
+        .edge513 {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #ffffff;
+            color: #222222;
+            font-family: "Segoe UI", Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .edge513-toolbar {
+            height: 48px;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 8px;
+            background: #f3f3f3;
+            border-bottom: 1px solid #d5d5d5;
+            box-sizing: border-box;
+        }
+
+        .edge513-nav {
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .edge513-nav:hover {
+            background: #dddddd;
+        }
+
+        .edge513-address {
+            flex: 1;
+            height: 34px;
+            box-sizing: border-box;
+            border: 1px solid #b8b8b8;
+            border-radius: 18px;
+            padding: 0 15px;
+            outline: none;
+            font-size: 14px;
+            background: #ffffff;
+        }
+
+        .edge513-address:focus {
+            border-color: #0078d4;
+        }
+
+        .edge513-go {
+            height: 32px;
+            padding: 0 14px;
+            border: 1px solid #cccccc;
+            border-radius: 16px;
+            background: #ffffff;
+            cursor: pointer;
+        }
+
+        .edge513-go:hover {
+            background: #eeeeee;
+        }
+
+        .edge513-page {
+            flex: 1;
+            overflow: auto;
+            background: #ffffff;
+        }
+
+        .edge513-home {
+            min-height: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 70px;
+            background: linear-gradient(#ffffff, #f5f5f5);
+        }
+
+        .edge513-logo {
+            font-size: 42px;
+            margin-bottom: 30px;
+            font-weight: 400;
+        }
+
+        .edge513-logo span {
+            font-weight: 600;
+        }
+
+        .edge513-search-box {
+            width: min(650px, 80%);
+            display: flex;
+            border: 1px solid #aaaaaa;
+            border-radius: 24px;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        .edge513-search-box input {
+            flex: 1;
+            height: 46px;
+            border: 0;
+            outline: none;
+            padding: 0 18px;
+            font-size: 16px;
+        }
+
+        .edge513-search-box button {
+            border: 0;
+            padding: 0 20px;
+            cursor: pointer;
+        }
+
+        .edge513-shortcuts {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .edge513-shortcuts button {
+            border: 1px solid #cccccc;
+            border-radius: 8px;
+            background: #ffffff;
+            padding: 10px 18px;
+            cursor: pointer;
+        }
+
+        .edge513-shortcuts button:hover {
+            background: #eeeeee;
+        }
+    `;
+
+    document.head.appendChild(style);
+})();
 function photosApp(c){let r=shell('Photos','<div class="v-toolbar"><button class="v-btn" id="add">Add</button><button class="v-btn" id="clear">Clear</button></div><div class="v-grid" id="g"></div>',true);state.photos=state.photos.length?state.photos:['🌄','🏙️','🌲','🌅'];let g=r.querySelector('#g');function draw(){g.innerHTML=state.photos.map((x,i)=>'<div class="v-card"><div class="v-photo">'+esc(x)+'</div><b>Photo '+(i+1)+'</b></div>').join('')}r.querySelector('#add').onclick=()=>{let x=prompt('Photo label or emoji','📷');if(x){state.photos.push(x);persist();draw()}};r.querySelector('#clear').onclick=()=>{state.photos=[];persist();draw()};draw();c.appendChild(r)}
 function weatherApp(c){let r=shell('Weather','<h1>☀️ 72°F</h1><p>Clear skies · Simulated local forecast</p><div class="v-grid">'+['Today','Tomorrow','Friday','Saturday','Sunday'].map((x,i)=>'<div class="v-card"><b>'+x+'</b><h2>'+['☀️','⛅','☁️','🌧️','☀️'][i]+'</h2><p>'+(72+i*2)+'°F</p></div>').join('')+'</div>',true);c.appendChild(r)}
 function mapsApp(c){let r=shell('Maps','<input class="v-input" id="loc" placeholder="Search a place"><button class="v-btn primary" id="search">Search</button><div class="v-map" id="map"><div class="v-road"></div><div class="v-pin" style="left:50%;top:43%">📍</div></div>',true);r.querySelector('#search').onclick=()=>{let x=r.querySelector('#loc').value||'Current location';notify('Maps','Showing '+x)};c.appendChild(r)}
@@ -2219,7 +2529,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     58%{opacity:.48}
     74%{opacity:.14}
   }
-  #boot.w10-v25-boot + *{ }
+  
 
   /* Same startup visual for the simulated restart overlay. */
   #w10-runtime-boot.w10-v25-runtime{background:#000!important;}
@@ -2322,13 +2632,30 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
   #w10-true-boot .tb-dot:nth-child(6){transform:rotate(225deg) translateY(-20px);animation-delay:-.70s}
   #w10-true-boot .tb-dot:nth-child(7){transform:rotate(270deg) translateY(-20px);animation-delay:-.84s}
   #w10-true-boot .tb-dot:nth-child(8){transform:rotate(315deg) translateY(-20px);animation-delay:-.98s}
-  @keyframes tb-dot-cycle{
-    0%{opacity:.08;filter:brightness:.75}
-    18%{opacity:.22}
-    36%{opacity:1;filter:brightness(1.15)}
-    54%{opacity:.38}
-    72%,100%{opacity:.08;filter:brightness:.75}
+  @keyframes tb-dot-cycle {
+  0% {
+    opacity: .08;
+    filter: brightness(.75);
   }
+
+  18% {
+    opacity: .22;
+  }
+
+  36% {
+    opacity: 1;
+    filter: brightness(1.15);
+  }
+
+  54% {
+    opacity: .38;
+  }
+
+  72%, 100% {
+    opacity: .08;
+    filter: brightness(.75);
+  }
+}
 </style>
 <script>
 (()=>{
